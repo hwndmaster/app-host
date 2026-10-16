@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore AppHost.slnx
+
+      - name: Build
+        run: dotnet build AppHost.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test AppHost.slnx --configuration Release --no-build --verbosity normal
+
+      # The image is what the server runs, so a Dockerfile that no longer builds fails here, not on publish.
+      - name: Build the image
+        run: docker build --file AppHost/Dockerfile --tag app-host:ci .

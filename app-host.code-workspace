@@ -1,0 +1,174 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/*.lscache": true,
+            "**/TestResults/": true,
+            "**/coverage/": true
+        },
+        "commands.workspaceCommands": {
+            "AppHost (.NET)": {
+                "nestedItems": {
+                    "Build": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "dotnet build AppHost.slnx",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "package",
+                        "iconColor": "textLink.activeForeground"
+                    },
+                    "Test": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "dotnet test AppHost.slnx",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "output",
+                        "iconColor": "editorBracketHighlight.foreground2"
+                    },
+                    "Run on this machine (reads build\\)": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "dotnet run --launch-profile local",
+                            "cwd": "${workspaceFolder}/AppHost",
+                            "reveal": true
+                        },
+                        "icon": "debug-start"
+                    },
+                    "Check outdated packages": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "dotnet list AppHost.slnx package --outdated",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "versions",
+                        "iconColor": "terminal.ansiYellow"
+                    }
+                }
+            },
+            "AppHost (Local stack)": {
+                "nestedItems": {
+                    "Sync applications into build\\": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./sync-apps.ps1",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "sync",
+                        "iconColor": "textLink.activeForeground"
+                    },
+                    "Build image": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "docker compose build",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "package",
+                        "iconColor": "textLink.activeForeground"
+                    },
+                    "Start app host (local image)": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./build/app-host/update.ps1 -SkipPull",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "debug-start"
+                    },
+                    "Update all applications": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./update-apps.ps1",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "debug-restart"
+                    },
+                    "Update all applications (local images)": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./update-apps.ps1 -SkipPull",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "debug-restart"
+                    },
+                    "App host log": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "docker logs --tail 100 --follow app-host",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "output"
+                    },
+                    "Open dashboard": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "start http://localhost:15100",
+                            "cwd": "${workspaceFolder}"
+                        },
+                        "icon": "link-external"
+                    }
+                }
+            },
+            "AppHost (Docker)": {
+                "nestedItems": {
+                    "Publish image": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./publish-docker.ps1",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "cloud-upload",
+                        "iconColor": "terminal.ansiYellow"
+                    },
+                    "Cleanup published packages": {
+                        "command": "commands.runInTerminal",
+                        "args": {
+                            "text": "powershell -ExecutionPolicy Bypass -File ./packages-cleanup.ps1",
+                            "cwd": "${workspaceFolder}",
+                            "reveal": true
+                        },
+                        "icon": "trash",
+                        "iconColor": "terminal.ansiYellow"
+                    }
+                }
+            }
+        },
+        "cSpell.words": [
+            "hwndmaster",
+            "OTLP"
+        ],
+        "cSpell.ignorePaths": [
+            ".git",
+            ".vscode",
+            "*.code-workspace",
+            "build"
+        ],
+        "[csharp]": {
+            "editor.tabSize": 4
+        },
+        "chat.tools.terminal.autoApprove": {
+            "docker compose config": true,
+            "docker logs": true,
+            "docker ps": true,
+            "dotnet build": true,
+            "dotnet list": true,
+            "dotnet test": true,
+            "Get-Item": true,
+            "Test-Path": true
+        }
+    }
+}

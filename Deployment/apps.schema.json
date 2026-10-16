@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "app-host apps.json",
+  "description": "The applications the app host runs, and their folders inside the apps root. How each one runs is in its own app.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [ "apps" ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "apps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "name", "path" ],
+        "properties": {
+          "name": {
+            "description": "Must equal the name in the application's app.json.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+          },
+          "path": {
+            "description": "The application's folder, relative to the apps root (APPHOST_APPS_ROOT).",
+            "type": "string",
+            "minLength": 1
+          },
+          "enabled": {
+            "description": "false keeps the entry but leaves the application alone: not started, not shown.",
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    }
+  }
+}

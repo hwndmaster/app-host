@@ -1,0 +1,71 @@
+# The shared Aspire app host.
+#
+# It runs no application itself. DCP, inside this container, creates and supervises every application's
+# containers on this server's Docker daemon, from the folders apps.json lists. The applications' containers
+# are persistent: stopping, restarting or updating this one leaves them running.
+#
+# Run from this directory:
+#   .\update.ps1
+name: app-host
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app-host:
+    image: ${APPHOST_REGISTRY:-ghcr.io/hwndmaster}/app-host:${APPHOST_IMAGE_TAG:-latest}
+    container_name: app-host
+    ports:
+      - "15100:15100"                       # dashboard
+      - "21100:21100"                       # OTLP/gRPC, from the APIs
+      - "21101:21101"                       # OTLP/HTTP, from browsers through each web container's nginx
+    environment:
+      # Host the dashboard's links to each application are shown under: the address browsers reach this
+      # server by, which the app host cannot find out from inside its container. Unset, they say localhost.
+      AppHost__PublicHost: ${APPHOST_PUBLIC_HOST:-}
+      # Address the applications' ports are published on. 127.0.0.1 makes them reachable from this server only.
+      AppHost__BindAddress: ${APPHOST_BIND_ADDRESS:-}
+      # Registry for applications whose app.json names none.
+      AppHost__Registry: ${APPHOST_APPS_REGISTRY:-}
+
+      # The dashboard asks for a login token by default; it is printed in this container's log
+      # (docker logs app-host). "true" only on a trusted network: it makes every log line, trace and
+      # environment variable in the dashboard readable by anyone who can reach port 15100.
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "${APPHOST_DASHBOARD_ANONYMOUS:-false}"
+
+      # Telemetry is kept in SQLite on the app-host-data volume and survives restarts. These bound how much:
+      # the oldest entries are evicted once a limit is reached. The applications' own log files remain the
+      # durable record; the dashboard holds the recent past.
+      Dashboard__TelemetryLimits__MaxLogCount: "20000"
+      Dashboard__TelemetryLimits__MaxTraceCount: "10000"
+      # Per metric dimension: one day at the OpenTelemetry SDK's default 60-second export interval.
+      Dashboard__TelemetryLimits__MaxMetricsCount: "1440"
+      # Long enough for a full .NET stack trace, short enough to stop one runaway value.
+      Dashboard__TelemetryLimits__MaxAttributeLength: "8192"
+      Dashboard__TelemetryLimits__MaxSpanEventCount: "32"
+    volumes:
+      # Docker-out-of-docker: lets DCP create the applications' containers as siblings on this daemon. It
+      # grants this container root-equivalent control of the daemon, which is acceptable on a single-tenant
+      # server running only images you build, and not on anything shared or exposed to the internet.
+      - /var/run/docker.sock:/var/run/docker.sock
+      # The apps root (C:\Docker on the server), read-only. The app host reads only the folders apps.json
+      # registers: each one's app.json and .env. Other containers' folders under it are visible but
+      # untouched, and that adds nothing to what the Docker socket above already grants.
+      - ${APPHOST_APPS_ROOT:?APPHOST_APPS_ROOT must be set (see .env.example)}:/apps:ro
+      # This folder, for apps.json. A folder rather than the single file: a bind-mounted file keeps pointing
+      # at the old file once an editor saves by replacing it.
+      - .:/config:ro
+      # The dashboard's SQLite store, under its default data folder. A named volume rather than a folder on
+      # a Windows host, whose file locking SQLite's write-ahead log does not get along with.
+      - app-host-data:/root/.aspire
+    # A backstop rather than a tight fit: two .NET processes (the app host and its dashboard) and DCP share it.
+    mem_limit: "${APPHOST_MEMORY_LIMIT:-768m}"
+    logging: *logging
+    restart: unless-stopped
+
+volumes:
+  app-host-data:
+    name: app-host-data

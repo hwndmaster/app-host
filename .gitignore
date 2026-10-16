@@ -1,0 +1,17 @@
+# Server-specific files created from their examples
+.env
+Deployment/apps.json
+
+# The local apps root sync-apps.ps1 assembles
+/build/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+TestResults/
+**/coverage/
+
+# IDE
+.vs/
+*.user
+*.suo

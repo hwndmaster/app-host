@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Product>AppHost</Product>
+    <Authors>Dima Kravtsov</Authors>
+    <Description>One Aspire app host that runs and observes the apps deployed on a server</Description>
+    <RepositoryUrl>https://github.com/hwndmaster/app-host</RepositoryUrl>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <RootNamespace>Genius.$(MSBuildProjectName)</RootNamespace>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
+
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+</Project>

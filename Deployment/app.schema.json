@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "app-host app.json",
+  "description": "How the app host runs one application. String values may use ${NAME}, ${NAME:-default} and ${NAME:?message}, resolved from the .env next to this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [ "name", "type", "api", "web" ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": {
+      "description": "Prefixes the container and image names (<name>-api, <name>-web).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "displayName": {
+      "description": "Heads the application's group on the Resources page. Defaults to name.",
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9]*(-[A-Za-z0-9]+)*$"
+    },
+    "type": {
+      "description": "atom-webapp: an ASP.NET Core API and an nginx container serving the SPA.",
+      "enum": [ "atom-webapp" ]
+    },
+    "registry": {
+      "description": "Defaults to the app host's AppHost:Registry (ghcr.io/hwndmaster).",
+      "type": "string"
+    },
+    "imageTag": { "type": "string", "default": "latest" },
+    "api": { "$ref": "#/$defs/container" },
+    "web": { "$ref": "#/$defs/container" }
+  },
+  "$defs": {
+    "port": {
+      "description": "A port number, or a ${NAME} string that expands to one.",
+      "type": [ "integer", "string" ]
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "containerPort", "hostPort" ],
+      "properties": {
+        "containerPort": { "$ref": "#/$defs/port" },
+        "hostPort": {
+          "$ref": "#/$defs/port",
+          "description": "Published on the server, at the app host's AppHost:BindAddress."
+        },
+        "memory": {
+          "description": "Memory limit in docker's notation: 384m, 1g. Unset leaves the container unlimited.",
+          "type": "string"
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "host", "container" ],
+            "properties": {
+              "host": {
+                "description": "A path on the server. On Docker Desktop for Windows a forward-slash Windows path: C:/Docker/MyApp/Data.",
+                "type": "string"
+              },
+              "container": { "type": "string", "pattern": "^/" },
+              "readOnly": { "type": "boolean", "default": false }
+            }
+          }
+        },
+        "environment": {
+          "description": "Variables set in the container. One whose value expands to an empty string is left out.",
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+          "additionalProperties": { "type": "string" }
+        },
+        "ports": {
+          "description": "Further published ports, e.g. a web container's HTTPS listener.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "containerPort", "hostPort" ],
+            "properties": {
+              "containerPort": { "$ref": "#/$defs/port" },
+              "hostPort": { "$ref": "#/$defs/port" },
+              "scheme": { "enum": [ "http", "https" ], "default": "http" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

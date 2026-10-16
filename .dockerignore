@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/TestResults/
+.git/
+.vs/
+.vscode/
+Deployment/
+AppHost.Tests/
+# The local apps root: other repositories' deployment files and .env secrets.
+build/

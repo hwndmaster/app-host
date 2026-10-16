@@ -1,0 +1,19 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- ASPIRE010 asks to resolve DCP and the dashboard from an installed Aspire CLI. This app host runs in a
+         container without one, so it keeps the NuGet-restored orchestration packages the Dockerfile copies
+         into the image. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Genius.AppHost.Tests" />
+  </ItemGroup>
+
+</Project>

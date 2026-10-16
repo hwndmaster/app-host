@@ -1,0 +1,8 @@
+# Builds the app host image. publish-docker.ps1 runs this and pushes the result; the server runs it from
+# Deployment/docker-compose.yml.
+services:
+  app-host:
+    build:
+      context: .
+      dockerfile: AppHost/Dockerfile
+    image: ghcr.io/hwndmaster/app-host:latest

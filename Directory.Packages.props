@@ -1,0 +1,13 @@
+<Project>
+
+  <ItemGroup>
+    <!-- Aspire: keep in step with the Sdk version in AppHost/AppHost.csproj -->
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.1" />
+
+    <!-- Tests: the same versions the Atom apps pin (Genius.Atom.Build PackageVersions.props) -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+</Project>
