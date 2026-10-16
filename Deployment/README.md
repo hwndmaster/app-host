@@ -26,6 +26,7 @@ the repository's `build\` folder from the neighbouring application repositories.
 | `apps.example.json` | Copy to `apps.json`. Lists the applications to run and their folders |
 | `apps.schema.json`, `app.schema.json` | Let an editor validate `apps.json` and each application's `app.json` |
 | `update.ps1` | Installs or updates the app host |
+| `diagnose.ps1` | Read-only checks for when the dashboard does not answer |
 
 ## Install
 
@@ -42,8 +43,8 @@ the repository's `build\` folder from the neighbouring application repositories.
 1. Copy the application's `Deployment\` folder to its folder under `C:\Docker` (for MyApp
    `C:\Docker\MyApp`), create its `.env` from `.env.example`, and create the data folders its
    `.env` names.
-2. Add it to `apps.json`: `name` as in its `app.json`, `path` the folder inside `C:\Docker`, e.g.
-   `{ "name": "my-app", "path": "MyApp" }`.
+2. Add its folder inside `C:\Docker` to `apps.json`, e.g. `{ "path": "MyApp" }`. An optional `name` is only
+   a label for messages; the application's own name comes from its `app.json`.
 3. Run the application's own `update.ps1`. It pulls the images and restarts the app host, which creates
    the containers.
 
@@ -62,3 +63,6 @@ Run one update at a time. Every update script takes the same machine-wide lock, 
   `app.json` or `.env`. Fix it and run that application's `update.ps1 -SkipPull`.
 - **A container shows "Failed to start".** The reason is in DCP's log inside the app host:
   `docker exec app-host sh -c "tail -n 40 /tmp/aspire-dcp*/resource-container-*.log"`
+- **The dashboard does not answer.** Open it as `http://127.0.0.1:15100` or by the server's LAN address:
+  `localhost` tries IPv6 first, where WSL's relay can hold the port and never answer. If that does not
+  help, run `.\diagnose.ps1` here (read-only) and look at, or send, its output.

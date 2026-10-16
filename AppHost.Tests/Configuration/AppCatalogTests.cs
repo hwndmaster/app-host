@@ -53,8 +53,7 @@ public sealed class AppCatalogTests : IDisposable
     }
 
     [Theory]
-    [InlineData("""{ "apps": [ { "name": "a", "path": "a" }, { "name": "a", "path": "b" } ] }""", "more than once")]
-    [InlineData("""{ "apps": [ { "name": "Bad_Name", "path": "a" } ] }""", "not a valid name")]
+    [InlineData("""{ "apps": [ { "path": "a" }, { "path": "A/" } ] }""", "more than once")]
     [InlineData("""{ "apps": [ { "name": "a", "path": "a", "colour": "blue" } ] }""", "colour")]
     [InlineData("""{ "apps": [ { "name": "a" } ] }""", "path")]
     public void Load_BrokenAppsFile_StopsTheHost(string json, string expected)
@@ -102,15 +101,43 @@ public sealed class AppCatalogTests : IDisposable
         Assert.Contains("$.api.volumes[0].host", entry.Error, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void Load_NameMismatch_IsReported()
+    [Theory]
+    [InlineData("""{ "apps": [ { "name": "My-App-Folder", "path": "my-app" } ] }""", "My-App-Folder")]
+    [InlineData("""{ "apps": [ { "path": "my-app" } ] }""", "my-app")]
+    public void Load_NameInAppsJson_IsOnlyALabel(string json, string label)
     {
-        WriteApps("""{ "apps": [ { "name": "pricechecker", "path": "my-app" } ] }""");
+        WriteApps(json);
         WriteApp("my-app", SampleApp("my-app"), "MY_APP_DATA_PATH=C:/Data");
 
         var entry = Assert.Single(Load());
 
-        Assert.Contains("registers this folder as 'pricechecker'", entry.Error, StringComparison.Ordinal);
+        Assert.Null(entry.Error);
+        Assert.Equal("my-app", entry.Definition!.Name);
+        Assert.Equal(label, entry.Registration.Label);
+    }
+
+    [Fact]
+    public void Load_InvalidAppName_IsReported()
+    {
+        WriteApps("""{ "apps": [ { "path": "bad" } ] }""");
+        WriteApp("bad", SampleApp("My_App"), "MY_APP_DATA_PATH=C:/Data");
+
+        var entry = Assert.Single(Load());
+
+        Assert.Contains("name 'My_App' is not valid", entry.Error, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Load_SameAppNameInTwoFolders_RejectsTheLaterOne()
+    {
+        WriteApps("""{ "apps": [ { "path": "one" }, { "path": "two" } ] }""");
+        WriteApp("one", SampleApp("my-app"), "MY_APP_DATA_PATH=C:/a");
+        WriteApp("two", SampleApp("my-app", displayName: "Other"), "MY_APP_DATA_PATH=C:/b\nMY_APP_API_PORT=6090\nMY_APP_WEB_PORT=6091");
+
+        var entries = Load();
+
+        Assert.Null(entries[0].Error);
+        Assert.Contains("The name 'my-app' is already used by 'one'", entries[1].Error, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -184,7 +211,7 @@ public sealed class AppCatalogTests : IDisposable
                 "memory": "512m",
                 "volumes": [ { "host": "${{{prefix}}_DATA_PATH}", "container": "/app/Data" } ],
               },
-              "web": { "containerPort": 8042, "hostPort": 5091, "memory": "64m" },
+              "web": { "containerPort": 8042, "hostPort": "${{{prefix}}_WEB_PORT:-5091}", "memory": "64m" },
             }
             """;
     }

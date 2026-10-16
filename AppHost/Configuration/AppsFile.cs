@@ -16,12 +16,17 @@ internal sealed record AppsFile
 
 internal sealed record AppRegistration
 {
-    /// <summary>Must equal the <c>name</c> in the application's app.json.</summary>
-    public required string Name { get; init; }
+    /// <summary>
+    /// Optional label for messages, such as the folder name. The application's own name, which names its
+    /// containers, comes from its app.json.
+    /// </summary>
+    public string? Name { get; init; }
 
     /// <summary>The application's folder, relative to the apps root.</summary>
     public required string Path { get; init; }
 
     /// <summary>False keeps the entry but leaves the application alone: not started, not shown.</summary>
     public bool Enabled { get; init; } = true;
+
+    public string Label => Name ?? Path;
 }

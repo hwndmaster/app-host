@@ -33,7 +33,9 @@ $ErrorActionPreference = "Stop"
 
 $LockName = "Global\AppHostUpdate"
 $ContainerName = "app-host"
-$DashboardUrl = "http://localhost:15100/"
+# 127.0.0.1, not localhost: on Windows localhost tries ::1 first, where WSL's relay can also listen on the
+# port and leave the request hanging.
+$DashboardUrl = "http://127.0.0.1:15100/"
 
 function Invoke-Step {
     param(

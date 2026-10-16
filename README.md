@@ -14,8 +14,11 @@ containers are persistent and do not depend on the app host to run.
 The app host's `apps.json` only lists the applications and their folders:
 
 ```json
-{ "apps": [ { "name": "my-app", "path": "MyApp" } ] }
+{ "apps": [ { "path": "MyApp" } ] }
 ```
+
+An entry may also carry a `name`, but only as a label for messages; the application's own name comes from
+its `app.json`.
 
 Each folder comes from the application's own repository (`Deployment/`) and holds its `app.json`:
 

@@ -12,12 +12,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [ "name", "path" ],
+        "required": [ "path" ],
         "properties": {
           "name": {
-            "description": "Must equal the name in the application's app.json.",
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+            "description": "Optional label for messages, e.g. the folder name. The application's own name comes from its app.json.",
+            "type": "string"
           },
           "path": {
             "description": "The application's folder, relative to the apps root (APPHOST_APPS_ROOT).",

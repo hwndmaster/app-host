@@ -115,7 +115,7 @@
                     "Open dashboard": {
                         "command": "commands.runInTerminal",
                         "args": {
-                            "text": "start http://localhost:15100",
+                            "text": "start http://127.0.0.1:15100",
                             "cwd": "${workspaceFolder}"
                         },
                         "icon": "link-external"

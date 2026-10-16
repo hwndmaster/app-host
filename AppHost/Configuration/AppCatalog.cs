@@ -21,7 +21,7 @@ internal sealed record CatalogEntry
     public string? Error { get; init; }
 
     /// <summary>The resource that groups the application on the Resources page.</summary>
-    public string GroupName => Definition?.DisplayName ?? Registration.Name;
+    public string GroupName => Definition?.DisplayName ?? Definition?.Name ?? Registration.Label;
 }
 
 /// <summary>
@@ -90,21 +90,13 @@ internal static partial class AppCatalog
 
         var registrations = file?.Apps ?? throw new ConfigurationException("apps.json is empty.");
 
-        foreach (var registration in registrations)
-        {
-            if (!AppName().IsMatch(registration.Name))
-            {
-                throw new ConfigurationException(
-                    $"apps.json: '{registration.Name}' is not a valid name. Use lower-case letters, digits and single hyphens, starting with a letter.");
-            }
-        }
-
+        // Ignoring case: the server's folders are on Windows.
         var duplicate = registrations
-            .GroupBy(registration => registration.Name, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(registration => registration.Path.Trim('/', '\\'), StringComparer.OrdinalIgnoreCase)
             .FirstOrDefault(group => group.Count() > 1);
         if (duplicate is not null)
         {
-            throw new ConfigurationException($"apps.json lists '{duplicate.Key}' more than once.");
+            throw new ConfigurationException($"apps.json lists the folder '{duplicate.Key}' more than once.");
         }
 
         return registrations;
@@ -135,10 +127,10 @@ internal static partial class AppCatalog
             var variables = EnvFile.Load(Path.Combine(folder, EnvFileName));
             var definition = ReadAppFile(appFile, variables);
 
-            if (!string.Equals(definition.Name, registration.Name, StringComparison.Ordinal))
+            if (!AppName().IsMatch(definition.Name))
             {
                 throw new ConfigurationException(
-                    $"app.json is named '{definition.Name}', but apps.json registers this folder as '{registration.Name}'.");
+                    $"app.json: name '{definition.Name}' is not valid. Use lower-case letters, digits and single hyphens, starting with a letter.");
             }
 
             if (definition.DisplayName is { } displayName && !ResourceName().IsMatch(displayName))
@@ -238,12 +230,13 @@ internal static partial class AppCatalog
         }
     }
 
-    // Two applications cannot publish the same host port or share a group name. The first registered keeps
-    // it; the later one is reported, so a mistake in a new app.json cannot break one already running.
+    // Two applications cannot publish the same host port, share an app name (it names the containers) or a
+    // group name. The first registered keeps it; the later one is reported, so a mistake in a new app.json
+    // cannot break one already running.
     private static List<CatalogEntry> RejectCollisions(List<CatalogEntry> entries)
     {
         var portOwners = new Dictionary<int, string>();
-        var groupOwners = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var nameOwners = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         for (var i = 0; i < entries.Count; i++)
         {
@@ -253,8 +246,9 @@ internal static partial class AppCatalog
                 continue;
             }
 
-            var name = entry.Registration.Name;
+            var label = entry.Registration.Label;
             var ports = entry.Type!.HostPorts(entry.Definition!).ToList();
+            var names = new[] { entry.Definition!.Name, entry.GroupName }.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
             var takenPort = ports.FirstOrDefault(portOwners.ContainsKey);
             if (takenPort != 0)
@@ -263,18 +257,22 @@ internal static partial class AppCatalog
                 continue;
             }
 
-            if (groupOwners.TryGetValue(entry.GroupName, out var groupOwner))
+            var takenName = names.FirstOrDefault(nameOwners.ContainsKey);
+            if (takenName is not null)
             {
-                entries[i] = entry with { Error = $"The name '{entry.GroupName}' is already used by '{groupOwner}'." };
+                entries[i] = entry with { Error = $"The name '{takenName}' is already used by '{nameOwners[takenName]}'." };
                 continue;
             }
 
             foreach (var port in ports)
             {
-                portOwners[port] = name;
+                portOwners[port] = label;
             }
 
-            groupOwners[entry.GroupName] = name;
+            foreach (var name in names)
+            {
+                nameOwners[name] = label;
+            }
         }
 
         return entries;
