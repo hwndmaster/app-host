@@ -8,7 +8,7 @@
   "properties": {
     "$schema": { "type": "string" },
     "name": {
-      "description": "Prefixes the container and image names (<name>-api, <name>-web).",
+      "description": "The name the application's images are published under (<registry>/<name>-api, -web). It also names the containers and prefixes the web image's nginx variables, so it is fixed by the application: keep the value its repository ships, whatever the folder is called.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
     },
@@ -56,7 +56,7 @@
             "required": [ "host", "container" ],
             "properties": {
               "host": {
-                "description": "A path on the server. On Docker Desktop for Windows a forward-slash Windows path: C:/Docker/MyApp/Data.",
+                "description": "A path on the server. On Docker Desktop for Windows a forward-slash Windows path: C:/Docker/my-app/Data.",
                 "type": "string"
               },
               "container": { "type": "string", "pattern": "^/" },

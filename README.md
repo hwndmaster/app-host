@@ -14,7 +14,7 @@ containers are persistent and do not depend on the app host to run.
 The app host's `apps.json` only lists the applications and their folders:
 
 ```json
-{ "apps": [ { "path": "MyApp" } ] }
+{ "apps": [ { "path": "my-app" } ] }
 ```
 
 An entry may also carry a `name`, but only as a label for messages; the application's own name comes from
@@ -56,7 +56,7 @@ which `sync-apps.ps1` assembles with the same layout:
 ```
 build\
 ├─ app-host\          this repository's Deployment\, plus .env and apps.json
-├─ MyApp\             my-app's Deployment\, plus .env
+├─ my-app\            my-app's Deployment\, plus .env
 └─ ...                one folder per application
 ```
 
@@ -69,7 +69,7 @@ exists (an earlier local deployment), otherwise from its example.
 .\sync-apps.ps1
 docker compose build                      # the app host image, tagged latest
 .\build\app-host\update.ps1 -SkipPull     # start the app host from it
-.\build\MyApp\update.ps1                  # pull and start one application
+.\build\my-app\update.ps1                 # pull and start one application
 .\update-apps.ps1                         # or every application, one after another
 ```
 

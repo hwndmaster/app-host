@@ -107,7 +107,7 @@ internal sealed class AtomWebAppType : IAppType
         }
 
         // As raw -v rather than WithBindMount: WithBindMount normalises the path with this container's Linux
-        // conventions, so a server path like C:/Docker/MyApp/Data became relative and was prefixed with the
+        // conventions, so a server path like C:/Docker/my-app/Data became relative and was prefixed with the
         // working directory. As -v the string reaches the daemon, which resolves it, untouched.
         foreach (var volume in definition.Volumes)
         {

@@ -7,10 +7,10 @@
     Copies the deployment folders in:
 
       build\app-host\         this repository's Deployment\
-      build\<DisplayName>\    each application's Deployment\, from its repository next to this one
+      build\<name>\           each application's Deployment\, from its repository next to this one
 
     The applications are the repositories next to this one that have a Deployment\app.json, unless -Apps
-    names them. Their folders are named after each application's displayName (e.g. MyApp), as they are
+    names them. Their folders are named after each application's app.json name (e.g. my-app), as they are
     under C:\Docker on the server, so the apps.json written here works there unchanged.
 
     Every run copies the deployment files again, so build\ always carries the repositories' current
@@ -25,7 +25,7 @@
     Then, to run it:
       docker compose build                      # in this repository: the app host image, tagged latest
       .\build\app-host\update.ps1 -SkipPull     # starts the app host from that image
-      .\build\MyApp\update.ps1                  # pulls and starts one application
+      .\build\my-app\update.ps1                 # pulls and starts one application
       .\update-apps.ps1                         # or every application in turn
 
 .PARAMETER SourceRoot
@@ -115,7 +115,7 @@ foreach ($repository in $Apps) {
     }
 
     $app = [System.IO.File]::ReadAllText($appFile) | ConvertFrom-Json
-    $folder = if ($app.PSObject.Properties["displayName"]) { $app.displayName } else { $app.name }
+    $folder = $app.name
     $target = Join-Path $Destination $folder
 
     Write-Host "==> $repository -> build\$folder" -ForegroundColor Cyan

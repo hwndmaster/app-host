@@ -56,7 +56,7 @@ internal sealed record ContainerDefinition
 internal sealed record VolumeDefinition
 {
     /// <summary>A path on the server. The daemon resolves it, so on Docker Desktop for Windows it is a
-    /// Windows path such as <c>C:/Docker/MyApp/Data</c>.</summary>
+    /// Windows path such as <c>C:/Docker/my-app/Data</c>.</summary>
     public required string Host { get; init; }
 
     public required string Container { get; init; }

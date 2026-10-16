@@ -7,7 +7,7 @@ and logs.
 ```
 C:\Docker\
 ├─ app-host\          this folder, plus .env and apps.json created from their examples
-├─ MyApp\             app.json, .env, docker-compose.yml, update.ps1 from my-app's Deployment\,
+├─ my-app\            app.json, .env, docker-compose.yml, update.ps1 from my-app's Deployment\,
 │                     plus Data\ and Logs\
 └─ ...                other containers' folders, which the app host ignores
 ```
@@ -40,10 +40,12 @@ the repository's `build\` folder from the neighbouring application repositories.
 
 ## Add an application
 
-1. Copy the application's `Deployment\` folder to its folder under `C:\Docker` (for MyApp
-   `C:\Docker\MyApp`), create its `.env` from `.env.example`, and create the data folders its
-   `.env` names.
-2. Add its folder inside `C:\Docker` to `apps.json`, e.g. `{ "path": "MyApp" }`. An optional `name` is only
+1. Copy the application's `Deployment\` folder to its folder under `C:\Docker` (for my-app
+   `C:\Docker\my-app`), create its `.env` from `.env.example`, and create the data folders its
+   `.env` names. Settings go in `.env`; leave `app.json` as shipped. Its `name` is the name the
+   application's images are published under, so changing it points the app host at images that do not
+   exist.
+2. Add its folder inside `C:\Docker` to `apps.json`, e.g. `{ "path": "my-app" }`. An optional `name` is only
    a label for messages; the application's own name comes from its `app.json`.
 3. Run the application's own `update.ps1`. It pulls the images and restarts the app host, which creates
    the containers.

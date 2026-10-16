@@ -33,7 +33,7 @@ It is not built on Genius.Atom and restores from nuget.org only (`nuget.config`)
 - **The apps root** is `C:\Docker` on the server, which also holds unrelated containers' folders.
   Locally it is this repository's git-ignored `build\`, assembled by `sync-apps.ps1` from the
   neighbouring app repositories. Both use the same layout: `app-host\` plus one folder per application,
-  named after its `displayName` (`MyApp`, ...).
+  named after the application's repository, which is also its `app.json` `name` (`my-app`, ...).
 - **`apps.json`** (in the app-host folder, next to the compose file) lists the applications and their
   folders, relative to the apps root mounted at `/apps`.
 - **Each application's folder** holds its `app.json`, `.env`, a pull-only `docker-compose.yml` and

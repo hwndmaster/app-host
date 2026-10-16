@@ -11,7 +11,7 @@ internal sealed record CatalogEntry
 {
     public required AppRegistration Registration { get; init; }
 
-    /// <summary>The application's folder as the app-host sees it, e.g. <c>/apps/MyApp</c>.</summary>
+    /// <summary>The application's folder as the app-host sees it, e.g. <c>/apps/my-app</c>.</summary>
     public required string Folder { get; init; }
 
     public AppDefinition? Definition { get; init; }
