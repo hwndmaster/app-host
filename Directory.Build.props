@@ -17,6 +17,8 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
 
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- A PackageVersion also overrides the package where it is only a transitive dependency. -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
 </Project>

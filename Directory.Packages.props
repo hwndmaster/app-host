@@ -3,6 +3,8 @@
   <ItemGroup>
     <!-- Aspire: keep in step with the Sdk version in AppHost/AppHost.csproj -->
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.1" />
+    <!-- Transitive pin: Aspire 13.6.1 brings 2.5.302 (GHSA-qhrr-8q5h-9q3h). Drop once Aspire depends on >= 2.5.303. -->
+    <PackageVersion Include="MessagePack" Version="2.5.307" />
 
     <!-- Tests: the same versions the Atom apps pin (Genius.Atom.Build PackageVersions.props) -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
