@@ -66,7 +66,6 @@ internal sealed class AtomWebAppType : IAppType
         AddContainer(builder, app, group, host, webName, $"{registry}/{webName}", app.Web!)
             .WithEnvironment($"{envPrefix}_API_UPSTREAM", apiUpstream)
             .WithEnvironment($"{envPrefix}_OTLP_UPSTREAM", host.OtlpHttpEndpoint)
-            .WithExternalHttpEndpoints()
             .WaitFor(api);
     }
 
@@ -88,12 +87,11 @@ internal sealed class AtomWebAppType : IAppType
             .WithImagePullPolicy(host.ImagePullPolicy)
             // Persistent: stopping or restarting the app-host must not take the application down with it.
             .WithLifetime(ContainerLifetime.Persistent)
-            // No host port on the endpoint: DCP always publishes it on 127.0.0.1, which would leave the app
-            // reachable from the server only. The reachable publish is the -p below.
-            .WithHttpEndpoint(targetPort: definition.ContainerPort, isProxied: false)
+            // Published with -p rather than an Aspire endpoint. DCP gives an endpoint without a fixed port a new
+            // random loopback port on every start, which changes the container's configuration and so recreates
+            // the persistent container each time the app-host restarts.
             .WithContainerRuntimeArgs("-p", $"{host.BindAddress}:{definition.HostPort}:{definition.ContainerPort}")
-            // Display only: the endpoint's own URL is DCP's loopback publish.
-            .WithUrlForEndpoint("http", url => url.Url = host.PublicUrl("http", definition.HostPort))
+            .WithUrl(host.PublicUrl("http", definition.HostPort))
             // Docker Desktop resolves host.docker.internal by itself; a plain Linux daemon needs the mapping.
             .WithContainerRuntimeArgs("--add-host", "host.docker.internal:host-gateway")
             // Docker Desktop groups containers by these labels. Without them a container inherits the labels

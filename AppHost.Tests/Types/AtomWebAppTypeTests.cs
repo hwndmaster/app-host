@@ -42,6 +42,24 @@ public sealed class AtomWebAppTypeTests
         Assert.Equal("1.2.3", image.Tag);
     }
 
+    // An Aspire endpoint without a fixed port gets a new random port on every start, which recreates the
+    // persistent containers each time the app-host restarts. Ports are published with -p instead.
+    [Fact]
+    public void AddResources_DeclaresNoEndpoints_AndLinksThePublicUrls()
+    {
+        var (builder, _) = Build(PrepperBox());
+
+        var api = Container(builder, "prepper-box-api");
+        var web = Container(builder, "prepper-box-web");
+
+        Assert.Empty(api.Annotations.OfType<EndpointAnnotation>());
+        Assert.Empty(web.Annotations.OfType<EndpointAnnotation>());
+        Assert.Equal(["http://192.168.1.20:5095"], api.Annotations.OfType<ResourceUrlAnnotation>().Select(url => url.Url));
+        Assert.Equal(
+            ["http://192.168.1.20:5096", "https://192.168.1.20:5097"],
+            web.Annotations.OfType<ResourceUrlAnnotation>().Select(url => url.Url));
+    }
+
     [Fact]
     public async Task AddResources_ApiRuntimeArgs_PublishMountLimitLabelAndRotateLogs()
     {

@@ -55,14 +55,15 @@ function Invoke-Step {
     Write-Host "OK: $Name" -ForegroundColor Green
 }
 
-# Any HTTP answer means the dashboard is up: it answers an anonymous request with a redirect to its login.
-function Test-Dashboard {
+# Returns why the dashboard cannot be reached, or nothing once it answers. The redirect to its login page is
+# followed: refusing it fails differently in Windows PowerShell 5.1 and 7.
+function Get-DashboardProblem {
     try {
-        Invoke-WebRequest -Uri $DashboardUrl -UseBasicParsing -TimeoutSec 5 -MaximumRedirection 0 | Out-Null
-        return $true
+        Invoke-WebRequest -Uri $DashboardUrl -UseBasicParsing -TimeoutSec 5 | Out-Null
+        return $null
     }
     catch {
-        return $null -ne $_.Exception.Response
+        return $_.Exception.Message
     }
 }
 
@@ -108,13 +109,13 @@ try {
 
     Invoke-Step "Wait for the dashboard" {
         $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-        while (-not (Test-Dashboard)) {
+        while ($problem = Get-DashboardProblem) {
             $running = docker inspect --format "{{.State.Running}}" $ContainerName
             if ($running -ne "true" -or (Get-Date) -gt $deadline) {
                 # Not redirected into the pipeline: Windows PowerShell 5.1 turns native stderr piped through
                 # 2>&1 into a terminating error under $ErrorActionPreference = "Stop".
-                docker logs --tail 30 $ContainerName
-                Write-Error "The app host did not come up. Its last log lines are above."
+                docker logs --tail 50 $ContainerName
+                Write-Error "The app host did not come up. Its log is above. Reaching $DashboardUrl last failed with: $problem"
                 exit 1
             }
 

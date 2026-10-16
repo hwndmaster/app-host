@@ -54,7 +54,10 @@ These are why `AtomWebAppType` looks the way it does. Each one failed silently w
   `/tmp/aspire-dcp*/resource-container-*.log` inside the app host.
 - **Mounts are raw `-v` arguments, never `WithBindMount`.** `WithBindMount` normalises Windows host paths
   with this Linux container's rules and breaks them.
-- **DCP publishes on 127.0.0.1 only.** The reachable publish is an explicit `-p <bind>:<host>:<container>`.
+- **No Aspire endpoints on the containers.** Ports are published with an explicit
+  `-p <bind>:<host>:<container>` and linked with `WithUrl`. An endpoint without a fixed port gets a random
+  one on every start, and Aspire 13.6 then recreates the persistent containers each time the app host
+  restarts. (DCP would also only publish it on 127.0.0.1.)
 - **`OTEL_SERVICE_NAME` is set explicitly.** Aspire injects it for projects only, and it equals the
   resource name so the dashboard ties telemetry to the resource.
 - **Images are pulled on the server, never by DCP.** Registry login is client-side, so a pull from inside
